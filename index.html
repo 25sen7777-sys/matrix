@@ -39,7 +39,7 @@
     display: inline-flex; justify-content: center; align-items: center;
     width: 20px; height: 20px; border-radius: 50%;
     background-color: #adb5bd; color: white;
-    font-size: 13px; font-weight: bold; cursor: help; position: relative;
+    font-size: 13px; font-weight: bold; cursor: pointer; position: relative; /* 💡 cursor: help를 pointer로 변경 */
   }
   .help-tooltip {
     visibility: hidden; width: 260px; background-color: #343a40; color: #fff; text-align: left; 
@@ -48,7 +48,8 @@
     font-size: 13px; font-weight: normal; line-height: 1.6;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none;
   }
-  .help-icon:hover .help-tooltip { visibility: visible; opacity: 1; pointer-events: auto; } 
+  /* 💡 hover 기능 삭제 후 클릭 시 보여주는 .show 클래스 추가 */
+  .help-tooltip.show { visibility: visible; opacity: 1; pointer-events: auto; } 
   .help-tooltip a { color: #4dabf7; text-decoration: none; transition: color 0.2s; }
   .help-tooltip a:hover { color: #74c0fc; text-decoration: underline; }
   .help-tooltip .email-link { color: #ced4da; font-size: 12px; }
@@ -134,7 +135,6 @@
   .task-checkbox { margin-right: 12px; cursor: pointer; width: 20px; height: 20px; accent-color: #4dabf7; flex-shrink: 0; }
   .task-text { flex: 1; font-size: 15px; color: #343a40; word-break: break-all; cursor: text; padding-right: 5px; }
   
-  /* 💡 아이콘들을 우측으로 몰아넣고 범위 겹치지 않게 조절 */
   .task-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
   .mobile-btn { 
@@ -191,7 +191,6 @@
 
     .header-controls { flex-direction: column; align-items: stretch; }
     
-    /* 💡 모바일 상단 버튼 재배치 (요일 설정 포함) */
     .left-controls { justify-content: center; margin-bottom: 10px; width: 100%; gap: 6px; }
     #date-picker { padding: 4px 6px; font-size: 13px; }
     #week-start-select { padding: 4px 6px; font-size: 12px; margin-left: 0; display: inline-block; }
@@ -214,13 +213,15 @@
   
   <div class="header-with-icon">
     <h2>새로운 할 일</h2>
-    <div class="help-icon">?
-      <div class="help-tooltip">
-        <strong>💡 기능 안내</strong><br><br>
-        - 🖱️ <strong>이동:</strong> 드래그하거나 우측 버튼 사용<br>
-        - ✏️ <strong>수정:</strong> 글씨 <b>더블클릭</b>으로 수정<br>
-        - ✅ <strong>완료:</strong> 좌측 체크박스 누르기<br>
-        - 🗑️ <strong>삭제:</strong> 우측 ✖ 버튼 누르기<br><br>
+    <div class="help-icon" onclick="toggleTooltip(event)">?
+      <div class="help-tooltip" id="helpTooltip">
+        <strong>🚀 매트릭스 활용법</strong><br><br>
+        - 🖱️ <strong>이동:</strong> 할 일을 원하는 칸으로 쭉 끌어다 놓으세요.<br>
+        - ✏️ <strong>수정:</strong> 할 일 글씨를 <b>더블클릭</b>하면 바로 수정<br>
+        - 📒 <strong>뷰어:</strong> 상단 탭에서 일주일을 한눈에 보고, 일/월요일 시작을 자유롭게 변경<br>
+        - 🗑️ <strong>삭제:</strong> ✖ 버튼으로 지우고, 하단 휴지통에서 다시 복구 가능<br><br>
+        - 📥 <strong>보관:</strong> (모바일) 우측 📥 버튼으로 대기열로 쏙!<br>
+        - 📅 <strong>날짜:</strong> (모바일) 📅 버튼으로 날짜를 정하면 '긴급&중요'로 자동 이동<br>
         <hr style="border: 0; border-top: 1px dashed #5c636a; margin: 10px 0;">
         <div style="text-align: center;">
           <span style="font-size: 14px;">✨ Created by <strong>찐감이</strong></span><br>
@@ -593,6 +594,21 @@
 
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
+
+  // 💡 툴팁 클릭 및 바깥 화면 클릭 시 닫기 기능 추가
+  function toggleTooltip(event) {
+    event.stopPropagation();
+    const tooltip = document.getElementById('helpTooltip');
+    tooltip.classList.toggle('show');
+  }
+
+  document.addEventListener('click', function(event) {
+    const tooltip = document.getElementById('helpTooltip');
+    const helpIcon = document.querySelector('.help-icon');
+    if (tooltip && tooltip.classList.contains('show') && !helpIcon.contains(event.target)) {
+      tooltip.classList.remove('show');
+    }
+  });
 </script>
 
 </body>
