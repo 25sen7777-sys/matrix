@@ -121,11 +121,11 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 4px; }
 
-  /* 💡 모바일 스크롤 버그 수정 완료 (touch-action: pan-y;) */
   .task { 
     background: #ffffff; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; 
     margin-bottom: 10px; display: flex; align-items: center; cursor: grab; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;
+    /* 💡 모바일 스크롤 버그 수정 (pan-y) */
     -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: pan-y;
   }
   .task.dragging { opacity: 0.5; }
@@ -170,7 +170,8 @@
   .trash-hint { font-size: 12px; margin-top: 2px; }
   .empty-trash-btn { background-color: #ff6b6b; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
   .empty-trash-btn:hover { background-color: #fa5252; }
-  #trash-list { display: none; height: 150px; background: #f8f9fa; border: 1px dashed #dee2e6; padding: 10px; margin-top: 10px; }
+  /* 💡 휴지통 내부 스크롤 허용 (overflow-y: auto) */
+  #trash-list { display: none; height: 150px; background: #f8f9fa; border: 1px dashed #dee2e6; padding: 10px; margin-top: 10px; overflow-y: auto; }
   #trash-list.show { display: block; }
 
   @media (max-width: 768px) {
@@ -443,7 +444,6 @@
         const id = e.dataTransfer.getData('text/plain'); const taskObj = tasks.find(t => t.id === id);
         if (taskObj) {
           taskObj.date = dStr; 
-          // 보관함에서 드롭 시 '긴급 & 중요 (q1)'으로 이동
           if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') taskObj.listId = 'q1'; 
           saveData(); renderUI(); 
         }
@@ -509,16 +509,22 @@
     dateLabel.appendChild(dateInput);
     actionsDiv.appendChild(dateLabel);
 
-    // 💡 휴지통 고스트 클릭 버그 완벽 수정 (stopPropagation, setTimeout 적용)
+    // 💡 완벽하게 수정된 삭제(휴지통 이동/영구삭제) 기능
     const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.innerText = '✖';
     deleteBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation(); 
-      setTimeout(() => {
-        if (taskObj.listId === 'trash-list') {
-          if(confirm('완전히 삭제하시겠습니까?')) { tasks = tasks.filter(t => t.id !== taskObj.id); saveData(); renderUI(); }
-        } else { taskObj.listId = 'trash-list'; saveData(); renderUI(); }
-      }, 10);
+      
+      // 모바일 중복 클릭(고스트 클릭) 원천 차단 타이머 (0.4초 딜레이 제한)
+      const now = Date.now();
+      if (window.lastDeleteTime && (now - window.lastDeleteTime < 400)) return;
+      window.lastDeleteTime = now;
+
+      if (taskObj.listId === 'trash-list') {
+        if(confirm('완전히 삭제하시겠습니까?')) { tasks = tasks.filter(t => t.id !== taskObj.id); saveData(); renderUI(); }
+      } else { 
+        taskObj.listId = 'trash-list'; saveData(); renderUI(); 
+      }
     };
     actionsDiv.appendChild(deleteBtn);
 
@@ -600,7 +606,7 @@
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
 
-  // 💡 툴팁 클릭 및 바깥 화면 클릭 시 닫기 기능
+  // 💡 물음표 클릭/닫기 기능 적용
   function toggleTooltip(event) {
     event.stopPropagation();
     const tooltip = document.getElementById('helpTooltip');
