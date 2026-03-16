@@ -216,21 +216,25 @@
   <div class="header-with-icon">
     <h2>새로운 할 일</h2>
     <div class="help-icon">?
-      <div class="help-tooltip">
-        <strong>💡 기능 안내</strong><br><br>
-        - 🖱️ <strong>이동:</strong> 드래그하거나 우측 버튼 사용<br>
-        - ✏️ <strong>수정:</strong> 글씨 <b>더블클릭</b>으로 수정<br>
-        - ✅ <strong>완료:</strong> 좌측 체크박스 누르기<br>
-        - 🗑️ <strong>삭제:</strong> 우측 ✖ 버튼 누르기<br><br>
-        <hr style="border: 0; border-top: 1px dashed #5c636a; margin: 10px 0;">
-        <div style="text-align: center;">
-          <span style="font-size: 14px;">✨ Created by <strong>찐감이</strong></span><br>
-          <div style="margin: 8px 0;">
-            <a href="https://blog.naver.com/zzin_potato1" target="_blank">📝 블로그</a> &nbsp;|&nbsp; 
-            <a href="https://www.instagram.com/zzin_potato1" target="_blank">📷 인스타</a>
-          </div>
-          ✉️ <a href="mailto:25sen7777@gmail.com" class="email-link">25sen7777@gmail.com</a>
-        </div>
+    <div class="help-tooltip" id="helpTooltip">
+  <strong>🚀 찐감이 매트릭스 활용법</strong><br><br>
+  - 🖱️ <strong>드래그 이동:</strong> 할 일을 원하는 칸으로 옮기세요. (모바일/PC 지원)<br>
+  - 📥 <strong>보관함 복귀:</strong> 할 일을 다시 대기열로 보낼 때 사용하세요.<br>
+  - 📅 <strong>날짜 픽커:</strong> 보관함에서 날짜를 정하면 즉시 <b>'긴급&중요'</b>로 이동!<br>
+  - 🗓️ <strong>주간 뷰:</strong> 상단 탭에서 일주일 전체 일정을 한눈에 관리하세요.<br>
+  - ⚙️ <strong>요일 설정:</strong> 내 스타일에 맞춰 <b>일/월요일 시작</b>을 변경 가능!<br>
+  - ✏️ <strong>내용 수정:</strong> 할 일 글씨를 <b>더블클릭</b>하면 수정할 수 있어요.<br>
+  - 🗑️ <strong>안전 삭제:</strong> 지운 할 일은 휴지통에서 복구하거나 완전 삭제 가능!<br><br>
+  <hr style="border: 0; border-top: 1px dashed #5c636a; margin: 10px 0;">
+  <div style="text-align: center;">
+    <span style="font-size: 14px;">✨ Created by <strong>찐감이</strong></span><br>
+    <div style="margin: 8px 0;">
+      <a href="https://blog.naver.com/zzin_potato1" target="_blank">📝 블로그</a> &nbsp;|&nbsp; 
+      <a href="https://www.instagram.com/zzin_potato1" target="_blank">📷 인스타</a>
+    </div>
+    ✉️ <a href="mailto:25sen7777@gmail.com" class="email-link">25sen7777@gmail.com</a>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -595,6 +599,24 @@
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
 </script>
+  /* 툴팁 클릭 토글 기능 */
+function toggleTooltip(event) {
+  event.stopPropagation();
+  const tooltip = document.getElementById('helpTooltip');
+  tooltip.style.visibility = (tooltip.style.visibility === 'visible') ? 'hidden' : 'visible';
+  tooltip.style.opacity = (tooltip.style.opacity === '1') ? '0' : '1';
+  tooltip.style.pointerEvents = (tooltip.style.pointerEvents === 'auto') ? 'none' : 'auto';
+}
+
+/* 바탕화면 클릭 시 툴팁 닫기 */
+document.addEventListener('click', function() {
+  const tooltip = document.getElementById('helpTooltip');
+  if (tooltip) {
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.opacity = '0';
+    tooltip.style.pointerEvents = 'none';
+  }
+});
 
 </body>
 </html>
