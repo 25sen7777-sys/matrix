@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="찐감이">
-<link rel="icon" href="logo.png">
+<link rel="icon" type="image/png" href="logo.png">
 <title>오늘의 아이젠하워 매트릭스</title>
 
 <script src="https://bernardo-castilho.github.io/DragDropTouch/DragDropTouch.js"></script>
@@ -211,10 +211,12 @@
 <div id="mobile-backdrop" onclick="toggleSidebar()"></div>
 
 <div id="sidebar" class="collapsed">
-  <div style="text-align: center; margin-bottom: 20px; padding: 10px;">
-    <img src="logo.png" alt="아이젠하워 매트릭스" style="width: 80px; height: 80px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-  </div>
   <button id="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
+
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 25px; padding-left: 5px;">
+    <img src="logo.png" alt="로고" style="width: 35px; height: 35px; border-radius: 8px;">
+    <span style="font-size: 1.1rem; font-weight: bold; color: #343a40; letter-spacing: -0.5px;">아이젠하워 매트릭스</span>
+  </div>
   
   <div class="header-with-icon">
     <h2>새로운 할 일</h2>
