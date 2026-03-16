@@ -39,7 +39,7 @@
     display: inline-flex; justify-content: center; align-items: center;
     width: 20px; height: 20px; border-radius: 50%;
     background-color: #adb5bd; color: white;
-    font-size: 13px; font-weight: bold; cursor: pointer; position: relative; /* 💡 cursor: help를 pointer로 변경 */
+    font-size: 13px; font-weight: bold; cursor: pointer; position: relative;
   }
   .help-tooltip {
     visibility: hidden; width: 260px; background-color: #343a40; color: #fff; text-align: left; 
@@ -48,7 +48,6 @@
     font-size: 13px; font-weight: normal; line-height: 1.6;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none;
   }
-  /* 💡 hover 기능 삭제 후 클릭 시 보여주는 .show 클래스 추가 */
   .help-tooltip.show { visibility: visible; opacity: 1; pointer-events: auto; } 
   .help-tooltip a { color: #4dabf7; text-decoration: none; transition: color 0.2s; }
   .help-tooltip a:hover { color: #74c0fc; text-decoration: underline; }
@@ -122,11 +121,12 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 4px; }
 
+  /* 💡 모바일 스크롤 버그 수정 완료 (touch-action: pan-y;) */
   .task { 
     background: #ffffff; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; 
     margin-bottom: 10px; display: flex; align-items: center; cursor: grab; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;
-    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation;
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: pan-y;
   }
   .task.dragging { opacity: 0.5; }
   .task.completed { background: #f8f9fa; border-color: #f1f3f5; }
@@ -443,7 +443,7 @@
         const id = e.dataTransfer.getData('text/plain'); const taskObj = tasks.find(t => t.id === id);
         if (taskObj) {
           taskObj.date = dStr; 
-          // 💡 보관함에서 드롭 시 '긴급 & 중요 (q1)'으로 이동
+          // 보관함에서 드롭 시 '긴급 & 중요 (q1)'으로 이동
           if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') taskObj.listId = 'q1'; 
           saveData(); renderUI(); 
         }
@@ -501,7 +501,6 @@
     
     dateInput.onchange = (e) => {
       taskObj.date = e.target.value;
-      // 💡 보관함에서 날짜 픽커로 선택 시 '긴급 & 중요 (q1)'으로 자동 이동
       if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') {
         taskObj.listId = 'q1';
       }
@@ -510,11 +509,16 @@
     dateLabel.appendChild(dateInput);
     actionsDiv.appendChild(dateLabel);
 
+    // 💡 휴지통 고스트 클릭 버그 완벽 수정 (stopPropagation, setTimeout 적용)
     const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.innerText = '✖';
-    deleteBtn.onclick = () => {
-      if (taskObj.listId === 'trash-list') {
-        if(confirm('완전히 삭제하시겠습니까?')) { tasks = tasks.filter(t => t.id !== taskObj.id); saveData(); renderUI(); }
-      } else { taskObj.listId = 'trash-list'; saveData(); renderUI(); }
+    deleteBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation(); 
+      setTimeout(() => {
+        if (taskObj.listId === 'trash-list') {
+          if(confirm('완전히 삭제하시겠습니까?')) { tasks = tasks.filter(t => t.id !== taskObj.id); saveData(); renderUI(); }
+        } else { taskObj.listId = 'trash-list'; saveData(); renderUI(); }
+      }, 10);
     };
     actionsDiv.appendChild(deleteBtn);
 
@@ -596,7 +600,7 @@
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
 
-  // 💡 툴팁 클릭 및 바깥 화면 클릭 시 닫기 기능 추가
+  // 💡 툴팁 클릭 및 바깥 화면 클릭 시 닫기 기능
   function toggleTooltip(event) {
     event.stopPropagation();
     const tooltip = document.getElementById('helpTooltip');
