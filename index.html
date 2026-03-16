@@ -60,7 +60,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 5;
   }
   .header-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-  .left-controls { display: flex; align-items: center; gap: 8px; }
+  .left-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
   #toggle-sidebar-btn {
     background: transparent; border: none; font-size: 1.5rem; cursor: pointer;
@@ -81,7 +81,7 @@
 
   #week-start-select {
     border: 1px solid #ced4da; border-radius: 6px; padding: 6px 10px;
-    font-family: inherit; font-size: 13px; color: #495057; cursor: pointer; outline: none; margin-left: 10px; background-color: #f8f9fa;
+    font-family: inherit; font-size: 13px; color: #495057; cursor: pointer; outline: none; margin-left: 5px; background-color: #f8f9fa;
   }
 
   .view-tabs { display: flex; gap: 5px; background: #f1f3f5; padding: 4px; border-radius: 8px; }
@@ -121,30 +121,35 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 4px; }
 
-  /* 💡 할 일 아이템 드래그 & 터치 최적화 */
   .task { 
     background: #ffffff; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; 
     margin-bottom: 10px; display: flex; align-items: center; cursor: grab; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;
-    /* 모바일에서 꾹 눌렀을 때 텍스트 복사 메뉴 뜨는 것 방지 */
-    -webkit-touch-callout: none; 
-    -webkit-user-select: none; 
-    user-select: none;
-    touch-action: manipulation;
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation;
   }
   .task.dragging { opacity: 0.5; }
   .task.completed { background: #f8f9fa; border-color: #f1f3f5; }
   .task.completed .task-text { text-decoration: line-through; color: #adb5bd; }
   
   .task-checkbox { margin-right: 12px; cursor: pointer; width: 20px; height: 20px; accent-color: #4dabf7; flex-shrink: 0; }
-  .task-text { flex: 1; font-size: 15px; color: #343a40; word-break: break-all; cursor: text; padding-right: 10px; }
+  .task-text { flex: 1; font-size: 15px; color: #343a40; word-break: break-all; cursor: text; padding-right: 5px; }
   
-  /* 💡 아이콘들을 우측으로 몰아넣는 컨테이너 */
-  .task-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  /* 💡 아이콘들을 우측으로 몰아넣고 범위 겹치지 않게 조절 */
+  .task-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-  .mobile-btn { display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; cursor: pointer; padding: 4px 6px; transition: transform 0.1s; }
+  .mobile-btn { 
+    display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; 
+    font-size: 14px; cursor: pointer; width: 28px; height: 28px; 
+    justify-content: center; align-items: center; transition: transform 0.1s; 
+    position: relative; overflow: hidden; padding: 0;
+  }
   .mobile-btn:active { transform: scale(0.9); }
-  .delete-btn { background: none; border: none; color: #ced4da; cursor: pointer; font-size: 18px; padding: 4px; transition: color 0.2s; }
+  
+  .delete-btn { 
+    background: none; border: none; color: #ced4da; cursor: pointer; 
+    font-size: 18px; padding: 4px; width: 28px; height: 28px; 
+    display: flex; align-items: center; justify-content: center; transition: color 0.2s; 
+  }
   .delete-btn:hover { color: #fa5252; }
 
   .label-q1 { border-left: 4px solid #ff6b6b; }
@@ -175,26 +180,28 @@
     
     #matrix-container.active-view { grid-template-columns: 1fr; padding: 15px; }
     
-    /* 💡 모바일 4분면 순서 재배치 (Flex & Order) */
-    .q-do       { order: 1; } /* 긴급 & 중요 */
-    .q-delegate { order: 2; } /* 긴급 & 덜중요 */
-    .q-schedule { order: 3; } /* 덜긴급 & 중요 */
-    .q-delete   { order: 4; } /* 덜긴급 & 덜중요 */
+    .q-do       { order: 1; } 
+    .q-delegate { order: 2; } 
+    .q-schedule { order: 3; } 
+    .q-delete   { order: 4; } 
 
     #weekly-board-container.active-view { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 15px; }
     .week-col { min-width: 85vw; scroll-snap-align: center; }
     #swipe-hint.show-hint { display: block; }
 
     .header-controls { flex-direction: column; align-items: stretch; }
-    .left-controls { justify-content: space-between; margin-bottom: 10px; width: 100%; }
+    
+    /* 💡 모바일 상단 버튼 재배치 (요일 설정 포함) */
+    .left-controls { justify-content: center; margin-bottom: 10px; width: 100%; gap: 6px; }
+    #date-picker { padding: 4px 6px; font-size: 13px; }
+    #week-start-select { padding: 4px 6px; font-size: 12px; margin-left: 0; display: inline-block; }
+    .nav-btn { width: 30px; height: 30px; }
+    
     .view-tabs { display: flex; width: 100%; }
     .view-tab { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; }
-    #week-start-select { display: none; }
 
-    /* 모바일 버튼 보이기 */
-    .mobile-btn { display: inline-flex; justify-content: center; align-items: center; }
+    .mobile-btn { display: flex; }
     .week-col-body .task { padding: 10px; font-size: 13.5px; }
-    .week-col-body .mobile-btn { padding: 3px 5px; font-size: 12px; }
   }
 </style>
 </head>
@@ -434,7 +441,8 @@
         const id = e.dataTransfer.getData('text/plain'); const taskObj = tasks.find(t => t.id === id);
         if (taskObj) {
           taskObj.date = dStr; 
-          if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') taskObj.listId = 'q2'; 
+          // 💡 보관함에서 드롭 시 '긴급 & 중요 (q1)'으로 이동
+          if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') taskObj.listId = 'q1'; 
           saveData(); renderUI(); 
         }
       });
@@ -454,12 +462,10 @@
     if(taskObj.completed) task.classList.add('completed');
     task.draggable = true; task.id = taskObj.id;
 
-    // 1. 체크박스
     const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.className = 'task-checkbox';
     checkbox.checked = taskObj.completed;
     checkbox.onchange = (e) => { taskObj.completed = e.target.checked; saveData(); renderUI(); };
 
-    // 2. 텍스트
     const span = document.createElement('span'); span.className = 'task-text'; span.innerText = taskObj.text;
     span.title = "더블클릭해서 수정하기";
     span.ondblclick = () => {
@@ -467,11 +473,9 @@
       if(newText !== null && newText.trim() !== '') { taskObj.text = newText.trim(); saveData(); renderUI(); }
     };
 
-    // 💡 3. 아이콘들 우측 분리 컨테이너
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'task-actions';
 
-    // 📥 보관함 이동 버튼
     if (taskObj.listId !== 'queue' && taskObj.listId !== 'trash-list') {
       const toQueueBtn = document.createElement('button');
       toQueueBtn.className = 'mobile-btn';
@@ -481,10 +485,8 @@
       actionsDiv.appendChild(toQueueBtn);
     }
 
-    // 📅 날짜 변경 버튼 (선택 시 자동으로 덜긴급&중요로 이동)
     const dateLabel = document.createElement('label');
     dateLabel.className = 'mobile-btn';
-    dateLabel.style.position = 'relative';
     dateLabel.innerHTML = '📅';
     dateLabel.title = '날짜 변경';
     
@@ -497,15 +499,15 @@
     
     dateInput.onchange = (e) => {
       taskObj.date = e.target.value;
+      // 💡 보관함에서 날짜 픽커로 선택 시 '긴급 & 중요 (q1)'으로 자동 이동
       if (taskObj.listId === 'queue' || taskObj.listId === 'trash-list') {
-        taskObj.listId = 'q2'; // 보관함에서 날짜 선택 시 자동으로 Schedule 영역으로 이동
+        taskObj.listId = 'q1';
       }
       saveData(); renderUI();
     };
     dateLabel.appendChild(dateInput);
     actionsDiv.appendChild(dateLabel);
 
-    // ✖ 삭제 버튼
     const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.innerText = '✖';
     deleteBtn.onclick = () => {
       if (taskObj.listId === 'trash-list') {
@@ -514,13 +516,15 @@
     };
     actionsDiv.appendChild(deleteBtn);
 
-    // 조합
     task.appendChild(checkbox); 
     task.appendChild(span); 
     task.appendChild(actionsDiv);
     
     task.addEventListener('dragstart', (e) => { 
       task.classList.add('dragging'); e.dataTransfer.setData('text/plain', task.id); 
+      if(window.innerWidth <= 768 && document.getElementById('sidebar').contains(task)) {
+        setTimeout(() => { toggleSidebar(); }, 10);
+      }
     });
     task.addEventListener('dragend', () => task.classList.remove('dragging'));
     return task;
@@ -562,7 +566,6 @@
     tasks = newTasks;
   }
 
-  // 💡 드래그 중 화면 위/아래 가장자리 닿으면 자동 스크롤되는 마법 함수
   function handleDragScroll(e, container) {
     if (!e.clientY) return;
     const edge = 80; const speed = 15;
@@ -588,7 +591,6 @@
     });
   });
 
-  // 드래그 자동 스크롤 이벤트 부착
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
 </script>
