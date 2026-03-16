@@ -598,25 +598,6 @@
 
   document.getElementById('matrix-container').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('matrix-container')));
   document.getElementById('sidebar').addEventListener('dragover', (e) => handleDragScroll(e, document.getElementById('sidebar')));
-
-  // 툴팁 클릭 토글 기능
-function toggleTooltip(event) {
-  event.stopPropagation();
-  const tooltip = document.getElementById('helpTooltip');
-  tooltip.style.visibility = (tooltip.style.visibility === 'visible') ? 'hidden' : 'visible';
-  tooltip.style.opacity = (tooltip.style.opacity === '1') ? '0' : '1';
-  tooltip.style.pointerEvents = (tooltip.style.pointerEvents === 'auto') ? 'none' : 'auto';
-}
-
-// 바탕화면 클릭 시 툴팁 닫기
-document.addEventListener('click', function() {
-  const tooltip = document.getElementById('helpTooltip');
-  if (tooltip) {
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.opacity = '0';
-    tooltip.style.pointerEvents = 'none';
-  }
-});
   
 </script>
 
