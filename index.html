@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="찐감이">
 <title>오늘의 아이젠하워 매트릭스</title>
 
 <script src="https://bernardo-castilho.github.io/DragDropTouch/DragDropTouch.js"></script>
@@ -13,16 +14,25 @@
     display: flex; height: 100vh; background-color: #f8f9fa; overflow: hidden; 
   }
   
-  /* 사이드바 */
+  #mobile-backdrop {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5); z-index: 990; transition: opacity 0.3s;
+  }
+  #mobile-backdrop.show { display: block; }
+
   #sidebar { 
     width: 320px; background-color: #ffffff; border-right: 1px solid #e9ecef; 
     display: flex; flex-direction: column; padding: 25px; box-sizing: border-box; 
     box-shadow: 2px 0 10px rgba(0,0,0,0.03); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0; z-index: 1000;
+    flex-shrink: 0; z-index: 1000; position: relative;
   }
   #sidebar.collapsed { transform: translateX(-320px); margin-left: -320px; }
 
-  /* 💡 기능 안내 + 찐감이 정보가 합쳐진 툴팁 */
+  #close-sidebar-btn {
+    display: none; position: absolute; right: 15px; top: 20px;
+    background: none; border: none; font-size: 20px; color: #adb5bd; cursor: pointer;
+  }
+
   .header-with-icon { display: flex; align-items: center; margin-bottom: 15px; }
   .header-with-icon h2 { margin-bottom: 0; margin-right: 8px; color: #343a40; font-size: 1.1rem; }
   .help-icon {
@@ -40,12 +50,10 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.15); pointer-events: none;
   }
   .help-icon:hover .help-tooltip { visibility: visible; opacity: 1; pointer-events: auto; } 
-  
   .help-tooltip a { color: #4dabf7; text-decoration: none; transition: color 0.2s; }
   .help-tooltip a:hover { color: #74c0fc; text-decoration: underline; }
   .help-tooltip .email-link { color: #ced4da; font-size: 12px; }
 
-  /* 메인 영역 */
   #main-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   
   #top-header {
@@ -66,18 +74,15 @@
     width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-weight: bold; color: #495057; transition: all 0.2s;
   }
-  .nav-btn:hover { background: #e9ecef; border-color: #adb5bd; }
 
   #date-picker {
     border: 1px solid #ced4da; border-radius: 6px; padding: 6px 10px;
-    font-family: inherit; font-size: 14px; color: #495057; cursor: pointer; outline: none;
-    background-color: #ffffff; font-weight: bold;
+    font-family: inherit; font-size: 14px; color: #495057; cursor: pointer; outline: none; background-color: #ffffff; font-weight: bold;
   }
 
   #week-start-select {
     border: 1px solid #ced4da; border-radius: 6px; padding: 6px 10px;
-    font-family: inherit; font-size: 13px; color: #495057; cursor: pointer; outline: none;
-    margin-left: 10px; background-color: #f8f9fa;
+    font-family: inherit; font-size: 13px; color: #495057; cursor: pointer; outline: none; margin-left: 10px; background-color: #f8f9fa;
   }
 
   .view-tabs { display: flex; gap: 5px; background: #f1f3f5; padding: 4px; border-radius: 8px; }
@@ -87,40 +92,26 @@
   }
   .view-tab.active { background: #ffffff; color: #339af0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-  /* 매트릭스 뷰 */
-  #matrix-container { 
-    flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
-    gap: 20px; padding: 25px; box-sizing: border-box; background-color: #f1f3f5; overflow-y: auto;
-  }
-  .quadrant { 
-    background: #ffffff; border-radius: 12px; padding: 20px; display: flex; 
-    flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.02); min-height: 200px; 
-  }
+  #matrix-container { display: none; flex: 1; gap: 20px; padding: 25px; box-sizing: border-box; background-color: #f1f3f5; overflow-y: auto; }
+  #matrix-container.active-view { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  
+  #weekly-board-container { display: none; flex: 1; gap: 15px; padding: 25px; background-color: #f1f3f5; overflow-y: auto; overflow-x: hidden; }
+  #weekly-board-container.active-view { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+  #swipe-hint { display: none; text-align: center; color: #868e96; font-size: 12px; padding: 8px 0 0 0; background: #f1f3f5; }
+
+  .quadrant { background: #ffffff; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.02); min-height: 200px; }
   .q-do       { border-top: 6px solid #ff6b6b; }
   .q-schedule { border-top: 6px solid #4dabf7; }
   .q-delegate { border-top: 6px solid #fcc419; }
   .q-delete   { border-top: 6px solid #adb5bd; }
 
-  /* 💡 주간 보드 뷰: 넓이 고정(minmax) 적용! */
-  #weekly-board-container {
-    flex: 1; display: none; 
-    grid-template-columns: repeat(7, minmax(0, 1fr)); /* 7칸을 무조건 동일한 너비로 강제 고정 */
-    gap: 15px; padding: 25px; background-color: #f1f3f5; overflow-y: auto; overflow-x: hidden;
-  }
-  .week-col {
-    background: #ffffff; border-radius: 12px; display: flex; flex-direction: column;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; min-height: 300px;
-    min-width: 0; /* 콘텐츠 길이에 의해 칸이 넓어지는 것을 방지 */
-  }
-  .week-col-header {
-    text-align: center; padding: 12px; border-bottom: 2px solid #f8f9fa;
-    font-weight: bold; font-size: 0.95rem; color: #343a40; background: #fafafa;
-  }
+  .week-col { background: #ffffff; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; min-height: 300px; min-width: 0; }
+  .week-col-header { text-align: center; padding: 12px; border-bottom: 2px solid #f8f9fa; font-weight: bold; font-size: 0.95rem; color: #343a40; background: #fafafa; }
   .week-col-header .date-sub { font-size: 0.8rem; color: #868e96; display: block; margin-top: 3px; }
   .week-col.is-today .week-col-header { background: #e7f5ff; color: #339af0; border-bottom-color: #d0ebff; }
   .week-col-body { flex: 1; padding: 10px; overflow-y: auto; background-color: transparent; min-height: 150px; }
   .week-col-body.drag-over { background-color: #f8f9fa; border: 2px dashed #ced4da; }
-  
   .week-separator { border-top: 1px dashed #dee2e6; margin: 12px 0; }
 
   h3 { margin-top: 0; color: #343a40; font-size: 1.1rem; flex-shrink: 0; }
@@ -131,13 +122,8 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background-color: #dee2e6; border-radius: 4px; }
 
-  .task { 
-    background: #ffffff; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; 
-    margin-bottom: 10px; display: flex; align-items: center; cursor: grab; user-select: none; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease;
-  }
+  .task { background: #ffffff; border: 1px solid #dee2e6; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; cursor: grab; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s ease; }
   .task.dragging { opacity: 0.5; }
-  .task:active { cursor: grabbing; transform: scale(0.98); }
   .task.completed { background: #f8f9fa; border-color: #f1f3f5; }
   .task.completed .task-text { text-decoration: line-through; color: #adb5bd; }
   
@@ -147,13 +133,16 @@
 
   .task-checkbox { margin-right: 12px; cursor: pointer; width: 20px; height: 20px; accent-color: #4dabf7; flex-shrink: 0; }
   .task-text { flex: 1; font-size: 15px; color: #343a40; word-break: break-all; cursor: text; }
-  
   .label-q1 { border-left: 4px solid #ff6b6b; }
   .label-q2 { border-left: 4px solid #4dabf7; }
   .label-q3 { border-left: 4px solid #fcc419; }
   .label-q4 { border-left: 4px solid #adb5bd; }
 
-  .delete-btn { background: none; border: none; color: #ced4da; cursor: pointer; font-size: 16px; padding: 0 0 0 10px; }
+  /* 💡 모바일에서만 보이는 전용 버튼 기본 숨김 처리 */
+  .mobile-btn { display: none; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 0 0 8px; transition: transform 0.1s; }
+  .mobile-btn:active { transform: scale(0.9); }
+
+  .delete-btn { background: none; border: none; color: #ced4da; cursor: pointer; font-size: 16px; padding: 0 0 0 8px; }
   .delete-btn:hover { color: #fa5252; }
 
   .input-group { display: flex; margin-bottom: 25px; flex-shrink: 0; }
@@ -173,33 +162,43 @@
   #trash-list.show { display: block; }
 
   @media (max-width: 768px) {
-    #sidebar { position: absolute; left: 0; top: 0; height: 100%; width: 100%; max-width: none; margin-left: 0; }
-    #matrix-container { grid-template-columns: 1fr; grid-template-rows: auto; padding: 15px; }
-    #weekly-board-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 15px; }
-    .week-col { min-width: 280px; scroll-snap-align: center; }
+    #sidebar { position: fixed; left: 0; top: 0; height: 100%; width: 85%; max-width: 320px; margin-left: 0; z-index: 1000; }
+    #sidebar.collapsed { transform: translateX(-100%); margin-left: 0; }
+    #close-sidebar-btn { display: block; } 
+    
+    #matrix-container.active-view { grid-template-columns: 1fr; padding: 15px; }
+    #weekly-board-container.active-view { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 15px; }
+    .week-col { min-width: 85vw; scroll-snap-align: center; }
+    #swipe-hint.show-hint { display: block; }
+
     .header-controls { flex-direction: column; align-items: stretch; }
     .left-controls { justify-content: space-between; margin-bottom: 10px; width: 100%; }
     .view-tabs { display: flex; width: 100%; }
     .view-tab { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; }
     #week-start-select { display: none; }
+
+    /* 💡 모바일 화면에서만 이동 버튼 활성화! */
+    .mobile-btn { display: inline-block; }
   }
 </style>
 </head>
 <body>
 
+<div id="mobile-backdrop" onclick="toggleSidebar()"></div>
+
 <div id="sidebar" class="collapsed">
+  <button id="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
+  
   <div class="header-with-icon">
     <h2>새로운 할 일</h2>
     <div class="help-icon">?
       <div class="help-tooltip">
         <strong>💡 기능 안내</strong><br><br>
-        - 🖱️ <strong>드래그 & 드롭:</strong> 꾹 눌러서 이동 (모바일 지원)<br>
-        - ✏️ <strong>수정하기:</strong> <b>더블클릭</b>으로 내용 수정<br>
-        - ✅ <strong>완료하기:</strong> 체크박스 누르기<br>
+        - 🖱️ <strong>이동:</strong> 드래그하거나 모바일 전용 버튼 사용<br>
+        - ✏️ <strong>수정:</strong> <b>더블클릭</b>으로 내용 수정<br>
+        - ✅ <strong>완료:</strong> 체크박스 누르기<br>
         - 🗑️ <strong>삭제:</strong> ✖ 버튼으로 휴지통 이동<br><br>
-        
         <hr style="border: 0; border-top: 1px dashed #5c636a; margin: 10px 0;">
-        
         <div style="text-align: center;">
           <span style="font-size: 14px;">✨ Created by <strong>찐감이</strong></span><br>
           <div style="margin: 8px 0;">
@@ -253,7 +252,9 @@
     </div>
   </div>
 
-  <div id="matrix-container">
+  <div id="swipe-hint">👉 옆으로 스와이프해서 다른 요일을 확인하세요</div>
+
+  <div id="matrix-container" class="active-view">
     <div class="quadrant q-do">
       <h3>🔥 긴급 & 중요 (Do) <span class="task-count" id="count-q1">(0)</span></h3>
       <div class="task-list" id="q1"></div>
@@ -287,37 +288,40 @@
     return `${y}-${m}-${d}`;
   };
 
-  const todayDate = new Date();
-  todayDate.setHours(0,0,0,0); 
+  const todayDate = new Date(); todayDate.setHours(0,0,0,0); 
   const todayStr = getFormattedDate(todayDate);
-  const tomorrowDate = new Date(todayDate);
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowDate = new Date(todayDate); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrowStr = getFormattedDate(tomorrowDate);
 
   let selectedDateStr = todayStr; 
   let currentMode = 'matrix'; 
 
   window.onload = () => {
-    if(window.innerWidth > 768) {
-      document.getElementById('sidebar').classList.remove('collapsed');
-    }
-
+    if(window.innerWidth > 768) { document.getElementById('sidebar').classList.remove('collapsed'); }
     document.getElementById('date-picker').value = todayStr;
     document.getElementById('week-start-select').value = weekStartDay.toString();
     
     const savedData = localStorage.getItem('eisenhowerDataV3');
     if (savedData) {
       tasks = JSON.parse(savedData);
-      tasks.forEach(t => {
-        const num = parseInt(t.id.split('-')[1]);
-        if(num > taskId) taskId = num;
-      });
+      tasks.forEach(t => { const num = parseInt(t.id.split('-')[1]); if(num > taskId) taskId = num; });
     }
     renderUI();
   };
 
   function saveData() { localStorage.setItem('eisenhowerDataV3', JSON.stringify(tasks)); }
-  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+  
+  function toggleSidebar() { 
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('mobile-backdrop');
+    sidebar.classList.toggle('collapsed'); 
+    
+    if (window.innerWidth <= 768) {
+      if(sidebar.classList.contains('collapsed')) backdrop.classList.remove('show');
+      else backdrop.classList.add('show');
+    }
+  }
+
   function changeWeekStart(e) { weekStartDay = parseInt(e.target.value); localStorage.setItem('eisenhowerWeekStart', weekStartDay.toString()); if (currentMode === 'week') renderUI(); }
   function navigateDate(direction) {
     const d = new Date(selectedDateStr);
@@ -352,13 +356,15 @@
     tasks.filter(t => t.listId === 'queue').forEach(t => document.getElementById('queue').appendChild(createTaskDOM(t)));
     tasks.filter(t => t.listId === 'trash-list').forEach(t => document.getElementById('trash-list').appendChild(createTaskDOM(t)));
 
+    const matrix = document.getElementById('matrix-container');
+    const weekly = document.getElementById('weekly-board-container');
+    const hint = document.getElementById('swipe-hint');
+
     if (currentMode === 'matrix') {
-      document.getElementById('matrix-container').style.display = 'grid';
-      document.getElementById('weekly-board-container').style.display = 'none';
+      matrix.classList.add('active-view'); weekly.classList.remove('active-view'); hint.classList.remove('show-hint');
       renderMatrix();
     } else {
-      document.getElementById('matrix-container').style.display = 'none';
-      document.getElementById('weekly-board-container').style.display = 'grid'; // flex에서 grid로 원복
+      matrix.classList.remove('active-view'); weekly.classList.add('active-view'); hint.classList.add('show-hint');
       renderWeeklyBoard();
     }
   }
@@ -374,11 +380,8 @@
   }
 
   function renderWeeklyBoard() {
-    const board = document.getElementById('weekly-board-container');
-    board.innerHTML = '';
-    const baseDate = new Date(selectedDateStr);
-    const dayOfWeek = baseDate.getDay(); 
-    const startOfWeek = new Date(baseDate);
+    const board = document.getElementById('weekly-board-container'); board.innerHTML = '';
+    const baseDate = new Date(selectedDateStr); const dayOfWeek = baseDate.getDay(); const startOfWeek = new Date(baseDate);
     
     if (weekStartDay === 0) startOfWeek.setDate(baseDate.getDate() - dayOfWeek);
     else { const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; startOfWeek.setDate(baseDate.getDate() + diff); }
@@ -388,32 +391,22 @@
     const currentDaysName = weekStartDay === 0 ? daysNameSun : daysNameMon;
     
     for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      const dStr = getFormattedDate(d);
+      const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i); const dStr = getFormattedDate(d);
       
-      const col = document.createElement('div');
-      col.className = 'week-col' + (dStr === todayStr ? ' is-today' : '');
-      const header = document.createElement('div');
-      header.className = 'week-col-header';
+      const col = document.createElement('div'); col.className = 'week-col' + (dStr === todayStr ? ' is-today' : '');
+      const header = document.createElement('div'); header.className = 'week-col-header';
       header.innerHTML = `${currentDaysName[i]}요일 <span class="date-sub">${d.getMonth()+1}/${d.getDate()}</span>`;
       
-      const body = document.createElement('div');
-      body.className = 'week-col-body'; body.dataset.date = dStr;
+      const body = document.createElement('div'); body.className = 'week-col-body'; body.dataset.date = dStr;
       
       const dayTasks = tasks.filter(t => t.date === dStr && !['queue', 'trash-list'].includes(t.listId));
-      const grouped = { q1: [], q3: [], q2: [], q4: [] };
-      dayTasks.forEach(t => grouped[t.listId].push(t));
+      const grouped = { q1: [], q3: [], q2: [], q4: [] }; dayTasks.forEach(t => grouped[t.listId].push(t));
       
       let hasPrevious = false;
       ['q1', 'q3', 'q2', 'q4'].forEach(cat => {
         if (grouped[cat].length > 0) {
-          if (hasPrevious) {
-            const sep = document.createElement('div'); sep.className = 'week-separator'; body.appendChild(sep);
-          }
-          grouped[cat].forEach(t => {
-            const taskEl = createTaskDOM(t, true); taskEl.classList.add('label-' + cat); body.appendChild(taskEl);
-          });
+          if (hasPrevious) { const sep = document.createElement('div'); sep.className = 'week-separator'; body.appendChild(sep); }
+          grouped[cat].forEach(t => { const taskEl = createTaskDOM(t, true); taskEl.classList.add('label-' + cat); body.appendChild(taskEl); });
           hasPrevious = true;
         }
       });
@@ -438,7 +431,6 @@
     if(!text) return;
     tasks.push({ id: 'task-' + (++taskId), text: text, completed: false, listId: 'queue', date: selectedDateStr });
     input.value = ''; input.focus(); saveData(); renderUI();
-    if(window.innerWidth <= 768) document.getElementById('sidebar').classList.add('collapsed');
   }
 
   function createTaskDOM(taskObj, isWeeklyView = false) {
@@ -457,6 +449,37 @@
       if(newText !== null && newText.trim() !== '') { taskObj.text = newText.trim(); saveData(); renderUI(); }
     };
 
+    // 💡 모바일 전용: 보관함으로 보내기 버튼 (이미 보관함/휴지통에 있으면 숨김)
+    if (taskObj.listId !== 'queue' && taskObj.listId !== 'trash-list') {
+      const toQueueBtn = document.createElement('button');
+      toQueueBtn.className = 'mobile-btn';
+      toQueueBtn.innerText = '📥';
+      toQueueBtn.title = '보관함으로 보내기';
+      toQueueBtn.onclick = () => { taskObj.listId = 'queue'; saveData(); renderUI(); };
+      task.appendChild(toQueueBtn);
+    }
+
+    // 💡 모바일 전용: 날짜 변경 버튼 (달력 이모티콘 뒤에 투명한 Date 픽커 숨김)
+    const dateLabel = document.createElement('label');
+    dateLabel.className = 'mobile-btn';
+    dateLabel.style.position = 'relative';
+    dateLabel.innerHTML = '📅';
+    dateLabel.title = '날짜 변경';
+    
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = taskObj.date;
+    dateInput.style.position = 'absolute'; dateInput.style.left = '0'; dateInput.style.top = '0';
+    dateInput.style.width = '100%'; dateInput.style.height = '100%';
+    dateInput.style.opacity = '0'; dateInput.style.cursor = 'pointer';
+    
+    dateInput.onchange = (e) => {
+      taskObj.date = e.target.value;
+      saveData(); renderUI();
+    };
+    dateLabel.appendChild(dateInput);
+    task.appendChild(dateLabel);
+
     const deleteBtn = document.createElement('button'); deleteBtn.className = 'delete-btn'; deleteBtn.innerText = '✖';
     deleteBtn.onclick = () => {
       if (taskObj.listId === 'trash-list') {
@@ -465,7 +488,13 @@
     };
 
     task.appendChild(checkbox); task.appendChild(span); task.appendChild(deleteBtn);
-    task.addEventListener('dragstart', (e) => { task.classList.add('dragging'); e.dataTransfer.setData('text/plain', task.id); });
+    
+    task.addEventListener('dragstart', (e) => { 
+      task.classList.add('dragging'); e.dataTransfer.setData('text/plain', task.id); 
+      if(window.innerWidth <= 768 && document.getElementById('sidebar').contains(task)) {
+        setTimeout(() => { toggleSidebar(); }, 10);
+      }
+    });
     task.addEventListener('dragend', () => task.classList.remove('dragging'));
     return task;
   }
